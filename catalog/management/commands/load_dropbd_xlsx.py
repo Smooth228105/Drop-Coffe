@@ -49,9 +49,35 @@ def _parse_price(value) -> Decimal | None:
         return None
 
 
-def _photo_value(value) -> str:
-    s = _cell_str(value)
-    return s[:500]
+def _normalize_photo_key(name: str) -> str:
+    """Ключ для сопоставления имени файла из xlsx с файлом в media/."""
+    return ' '.join(name.replace('\xa0', ' ').split()).casefold()
+
+
+def _build_media_index(media_dir: Path) -> dict[str, str]:
+    """normalized_key -> фактическое имя файла в media/."""
+    index: dict[str, str] = {}
+    if not media_dir.is_dir():
+        return index
+    for path in media_dir.iterdir():
+        if not path.is_file() or path.name.startswith('.'):
+            continue
+        key = _normalize_photo_key(path.name)
+        index.setdefault(key, path.name)
+    return index
+
+
+def _resolve_photo_filename(raw: str, media_index: dict[str, str]) -> str:
+    text = '' if raw is None else str(raw).strip()
+    if not text:
+        return ''
+    basename = Path(text.replace('\\', '/')).name
+    if basename in media_index.values():
+        return basename[:500]
+    resolved = media_index.get(_normalize_photo_key(basename))
+    if resolved:
+        return resolved[:500]
+    return basename[:500]
 
 
 class Command(BaseCommand):
@@ -87,6 +113,9 @@ class Command(BaseCommand):
             self.stderr.write(self.style.WARNING(f'В {drop_dir} нет файлов .xlsx'))
             return
 
+        media_dir = base / 'media'
+        media_index = _build_media_index(media_dir)
+
         total_products = 0
         for path in files:
             stem = path.stem
@@ -119,7 +148,11 @@ class Command(BaseCommand):
                     continue
                 price = _parse_price(cells[1]) if len(cells) > 1 else None
                 description = _cell_str(cells[2]) if len(cells) > 2 else ''
-                photo = _photo_value(cells[3]) if len(cells) > 3 else ''
+                photo = (
+                    _resolve_photo_filename(cells[3], media_index)
+                    if len(cells) > 3
+                    else ''
+                )
 
                 Product.objects.update_or_create(
                     category=category,
