@@ -22,7 +22,7 @@ STEM_TO_TITLE = {
     'baking': 'Выпечка',
     'bread': 'Хлеб',
     'cakes': 'Торты',
-    'coffee': 'Кофе',
+    'coffee': 'Напитки',
     'desserts': 'Десерты',
 }
 

@@ -1,0 +1,20 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Manrope', system-ui, sans-serif;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --color-cream-50: #fdf8f3;
+  --color-cream-100: #f7efe6;
+  --color-cream-200: #ebe0d4;
+  --color-espresso-700: #3d2c24;
+  --color-espresso-800: #2a1f1a;
+  --color-espresso-900: #1c1411;
+  --color-caramel-500: #c47b4a;
+  --color-caramel-600: #a86538;
+}
+
+@layer base {
+  body {
+    @apply bg-cream-50 font-sans text-espresso-900 antialiased;
+  }
+}

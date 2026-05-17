@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "npm --cwd frontend run dev",
+    "build": "npm --cwd frontend run build",
+    "preview": "npm --cwd frontend run preview",
+    "lint": "npm --cwd frontend run lint",
+    "install:frontend": "npm --cwd frontend install"
+  }
+}
