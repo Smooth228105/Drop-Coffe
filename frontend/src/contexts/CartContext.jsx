@@ -6,7 +6,7 @@ import { useToast } from './ToastContext'
 const CartContext = createContext(null)
 
 export function CartProvider({ children }) {
-  const { isAuthenticated, loading: authLoading } = useAuth()
+  const { isAuthenticated, loading: authLoading, openLogin, canUseCart } = useAuth()
   const { showToast } = useToast()
 
   const [items, setItems] = useState([])
@@ -57,8 +57,8 @@ export function CartProvider({ children }) {
 
   const addToCart = useCallback(
     async (productId) => {
-      if (!isAuthenticated) {
-        setIsOpen(true)
+      if (!isAuthenticated || !canUseCart) {
+        openLogin()
         return false
       }
 
@@ -77,7 +77,7 @@ export function CartProvider({ children }) {
         setActionLoading(false)
       }
     },
-    [isAuthenticated, loadCart, showToast],
+    [isAuthenticated, canUseCart, openLogin, loadCart, showToast],
   )
 
   const removeFromCart = useCallback(

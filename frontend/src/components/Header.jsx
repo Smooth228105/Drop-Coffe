@@ -9,7 +9,7 @@ function CartIcon() {
   )
 }
 
-export default function Header({ cartCount, onCartClick, title, subtitle }) {
+export default function Header({ cartCount, onCartClick, title, subtitle, showCart = true }) {
   return (
     <header className="sticky top-0 z-30 border-b border-cream-200 bg-cream-50/90 backdrop-blur-md">
       <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
@@ -28,19 +28,21 @@ export default function Header({ cartCount, onCartClick, title, subtitle }) {
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <AccountDropdown />
 
-          <button
-            type="button"
-            onClick={onCartClick}
-            aria-label="Корзина"
-            className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-cream-200 bg-white text-espresso-900 shadow-sm transition-all hover:border-caramel-500/30 hover:shadow-md"
-          >
-            <CartIcon />
-            {cartCount > 0 && (
-              <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-caramel-600 px-1 text-[11px] font-bold text-white">
-                {cartCount > 99 ? '99+' : cartCount}
-              </span>
-            )}
-          </button>
+          {showCart && (
+            <button
+              type="button"
+              onClick={onCartClick}
+              aria-label="Корзина"
+              className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-cream-200 bg-white text-espresso-900 shadow-sm transition-all hover:border-caramel-500/30 hover:shadow-md"
+            >
+              <CartIcon />
+              {cartCount > 0 && (
+                <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-caramel-600 px-1 text-[11px] font-bold text-white">
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </header>

@@ -5,6 +5,12 @@ import {
   register as registerRequest,
 } from '../api/authApi'
 import { clearTokens, hasStoredTokens, setTokens } from '../api/tokenStorage'
+import {
+  canManageOrders,
+  canManageProducts,
+  canUseCart,
+  getRole,
+} from '../utils/roles'
 
 const AuthContext = createContext(null)
 
@@ -131,7 +137,11 @@ export function AuthProvider({ children }) {
   const value = useMemo(
     () => ({
       user,
+      role: getRole(user),
       isAuthenticated: Boolean(user),
+      canUseCart: canUseCart(user),
+      canManageOrders: canManageOrders(user),
+      canManageProducts: canManageProducts(user),
       loading,
       actionLoading,
       error,

@@ -1,13 +1,18 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { checkoutOrder } from '../api/ordersApi'
 import { useAuth } from '../contexts/AuthContext'
 import { useCart } from '../contexts/CartContext'
+import { useToast } from '../contexts/ToastContext'
+import { canManageOrders } from '../utils/roles'
 import CartItem from './CartItem'
 import EmptyState from './EmptyState'
 import Loader from './Loader'
 import { formatPrice } from '../utils/formatPrice'
 
 export default function CartDrawer() {
-  const { isAuthenticated, openLogin } = useAuth()
+  const { user, isAuthenticated, openLogin, canUseCart } = useAuth()
+  const { showToast } = useToast()
   const {
     isOpen,
     closeCart,
@@ -20,7 +25,10 @@ export default function CartDrawer() {
     increaseQuantity,
     decreaseQuantity,
     removeFromCart,
+    loadCart,
   } = useCart()
+  const [checkoutLoading, setCheckoutLoading] = useState(false)
+  const showManageOrders = canManageOrders(user)
 
   useEffect(() => {
     if (!isOpen) {
@@ -146,8 +154,8 @@ export default function CartDrawer() {
           )}
         </div>
 
-        {isAuthenticated && !loading && !error && !isEmpty && (
-          <div className="border-t border-cream-200 bg-cream-50 px-6 py-5">
+        {isAuthenticated && canUseCart && !loading && !error && !isEmpty && (
+          <div className="space-y-3 border-t border-cream-200 bg-cream-50 px-6 py-5">
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold uppercase tracking-wide text-espresso-700/70">
                 Итого
@@ -156,6 +164,35 @@ export default function CartDrawer() {
                 {formatPrice(totalPrice)}
               </span>
             </div>
+            <button
+              type="button"
+              disabled={checkoutLoading || actionLoading}
+              onClick={async () => {
+                setCheckoutLoading(true)
+                try {
+                  await checkoutOrder()
+                  await loadCart()
+                  showToast('Заказ оформлен')
+                  closeCart()
+                } catch (err) {
+                  showToast(err.message, 'error')
+                } finally {
+                  setCheckoutLoading(false)
+                }
+              }}
+              className="w-full rounded-xl bg-caramel-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-caramel-500 disabled:opacity-60"
+            >
+              {checkoutLoading ? 'Оформление…' : 'Оформить заказ'}
+            </button>
+            {showManageOrders && (
+              <Link
+                to="/manage-orders"
+                onClick={closeCart}
+                className="block w-full rounded-xl border border-caramel-500/30 bg-white px-4 py-3 text-center text-sm font-semibold text-caramel-600 transition hover:bg-caramel-600/10"
+              >
+                Управление заказами
+              </Link>
+            )}
           </div>
         )}
       </aside>

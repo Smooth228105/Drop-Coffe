@@ -1,5 +1,9 @@
+from decimal import Decimal
+
 from django.conf import settings
 from django.db import models
+
+from .constants import ORDER_STATUS_CHOICES, ORDER_STATUS_PROCESSING, ROLE_CHOICES, ROLE_CLIENT
 
 
 class Category(models.Model):
@@ -106,3 +110,87 @@ class CartItem(models.Model):
         if self.product.price is None:
             return 0
         return self.product.price * self.quantity
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='profile',
+        verbose_name='Пользователь',
+    )
+    role = models.CharField(
+        'Роль',
+        max_length=20,
+        choices=ROLE_CHOICES,
+        default=ROLE_CLIENT,
+    )
+
+    class Meta:
+        verbose_name = 'Профиль пользователя'
+        verbose_name_plural = 'Профили пользователей'
+
+    def __str__(self):
+        return f'{self.user.username} ({self.get_role_display()})'
+
+
+class Order(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='orders',
+        verbose_name='Пользователь',
+    )
+    status = models.CharField(
+        'Статус',
+        max_length=20,
+        choices=ORDER_STATUS_CHOICES,
+        default=ORDER_STATUS_PROCESSING,
+    )
+    total_price = models.DecimalField(
+        'Сумма',
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal('0.00'),
+    )
+    created_at = models.DateTimeField('Создан', auto_now_add=True)
+    updated_at = models.DateTimeField('Обновлён', auto_now=True)
+
+    class Meta:
+        verbose_name = 'Заказ'
+        verbose_name_plural = 'Заказы'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Заказ #{self.pk} — {self.user.username}'
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name='items',
+        verbose_name='Заказ',
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='order_items',
+        verbose_name='Товар',
+    )
+    product_name = models.CharField('Название товара', max_length=255)
+    unit_price = models.DecimalField('Цена за единицу', max_digits=10, decimal_places=2)
+    quantity = models.PositiveIntegerField('Количество', default=1)
+
+    class Meta:
+        verbose_name = 'Позиция заказа'
+        verbose_name_plural = 'Позиции заказа'
+
+    def __str__(self):
+        return f'{self.product_name} × {self.quantity}'
+
+    @property
+    def line_total(self):
+        return self.unit_price * self.quantity

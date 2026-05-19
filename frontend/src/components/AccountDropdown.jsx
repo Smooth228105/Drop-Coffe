@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { ROLES } from '../utils/roles'
 
 function UserIcon() {
   return (
@@ -37,6 +38,12 @@ export default function AccountDropdown() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [accountOpen, setAccountOpen])
 
+  const roleLabels = {
+    [ROLES.CLIENT]: 'Клиент',
+    [ROLES.MANAGER]: 'Менеджер',
+    [ROLES.ADMIN]: 'Администратор',
+  }
+
   const handleAccountClick = () => {
     if (isAuthenticated) {
       toggleAccount()
@@ -63,6 +70,9 @@ export default function AccountDropdown() {
           <div className="border-b border-cream-200 px-4 py-4">
             <p className="font-semibold text-espresso-900">{user?.username}</p>
             <p className="mt-1 truncate text-sm text-espresso-700/70">{user?.email || '—'}</p>
+            <span className="mt-2 inline-flex rounded-full bg-caramel-600/10 px-2.5 py-0.5 text-xs font-semibold text-caramel-600">
+              {roleLabels[user?.role] || user?.role}
+            </span>
           </div>
           <button
             type="button"

@@ -3,11 +3,18 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from .role_utils import get_user_role
+
 
 class UserSerializer(serializers.ModelSerializer):
+    role = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'role')
+
+    def get_role(self, obj: User) -> str:
+        return get_user_role(obj)
 
 
 class LoginSerializer(serializers.Serializer):

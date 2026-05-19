@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Cart, CartItem, Category, Product
+from .models import Cart, CartItem, Category, Order, OrderItem, Product, UserProfile
 
 
 class ProductInline(admin.TabularInline):
@@ -36,3 +36,24 @@ class CartAdmin(admin.ModelAdmin):
     list_display = ('user', 'updated_at')
     search_fields = ('user__username', 'user__email')
     inlines = (CartItemInline,)
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'role')
+    list_filter = ('role',)
+    search_fields = ('user__username', 'user__email')
+
+
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 0
+    readonly_fields = ('product_name', 'unit_price', 'quantity')
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'status', 'total_price', 'created_at')
+    list_filter = ('status', 'created_at')
+    search_fields = ('user__username', 'user__email')
+    inlines = (OrderItemInline,)

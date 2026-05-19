@@ -13,6 +13,11 @@ export default function ProductDrawer({
   onClose,
   onAddToCart,
   addLoading,
+  showAddButton = true,
+  canEdit = false,
+  canDelete = false,
+  onEdit,
+  onDelete,
 }) {
   useEffect(() => {
     if (!isOpen) {
@@ -110,14 +115,40 @@ export default function ProductDrawer({
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => onAddToCart?.(product)}
-            disabled={addLoading}
-            className="mt-auto rounded-xl bg-caramel-600 px-4 py-3.5 text-sm font-bold text-white transition hover:bg-caramel-500 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {addLoading ? 'Добавление…' : 'Добавить в корзину'}
-          </button>
+          <div className="mt-auto space-y-3 pt-4">
+            {showAddButton && (
+              <button
+                type="button"
+                onClick={() => onAddToCart?.(product)}
+                disabled={addLoading}
+                className="w-full rounded-xl bg-caramel-600 px-4 py-3.5 text-sm font-bold text-white transition hover:bg-caramel-500 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {addLoading ? 'Добавление…' : 'Добавить в корзину'}
+              </button>
+            )}
+            {(canEdit || canDelete) && (
+              <div className="flex gap-3">
+                {canEdit && (
+                  <button
+                    type="button"
+                    onClick={() => onEdit?.(product)}
+                    className="flex-1 rounded-xl border border-cream-200 bg-cream-50 px-4 py-3 text-sm font-semibold text-espresso-900 transition hover:border-caramel-500/30"
+                  >
+                    Редактировать
+                  </button>
+                )}
+                {canDelete && (
+                  <button
+                    type="button"
+                    onClick={() => onDelete?.(product)}
+                    className="flex-1 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100"
+                  >
+                    Удалить
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </aside>
     </div>
