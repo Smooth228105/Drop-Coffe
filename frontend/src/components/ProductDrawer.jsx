@@ -7,7 +7,13 @@ const PLACEHOLDER =
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect fill="#f7efe6" width="400" height="300"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#a86538" font-family="sans-serif" font-size="18">Нет фото</text></svg>',
   )
 
-export default function ProductDrawer({ product, isOpen, onClose }) {
+export default function ProductDrawer({
+  product,
+  isOpen,
+  onClose,
+  onAddToCart,
+  addLoading,
+}) {
   useEffect(() => {
     if (!isOpen) {
       return undefined
@@ -103,6 +109,15 @@ export default function ProductDrawer({ product, isOpen, onClose }) {
               {product.description?.trim() || 'Описание скоро появится.'}
             </p>
           </div>
+
+          <button
+            type="button"
+            onClick={() => onAddToCart?.(product)}
+            disabled={addLoading}
+            className="mt-auto rounded-xl bg-caramel-600 px-4 py-3.5 text-sm font-bold text-white transition hover:bg-caramel-500 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {addLoading ? 'Добавление…' : 'Добавить в корзину'}
+          </button>
         </div>
       </aside>
     </div>

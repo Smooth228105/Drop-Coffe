@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Product
+from .models import Cart, CartItem, Category, Product
 
 
 class ProductInline(admin.TabularInline):
@@ -23,3 +23,16 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ('category',)
     search_fields = ('name', 'description', 'photo')
     autocomplete_fields = ('category',)
+
+
+class CartItemInline(admin.TabularInline):
+    model = CartItem
+    extra = 0
+    autocomplete_fields = ('product',)
+
+
+@admin.register(Cart)
+class CartAdmin(admin.ModelAdmin):
+    list_display = ('user', 'updated_at')
+    search_fields = ('user__username', 'user__email')
+    inlines = (CartItemInline,)

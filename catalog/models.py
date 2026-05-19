@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -45,3 +46,63 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Cart(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='cart',
+        verbose_name='Пользователь',
+    )
+    updated_at = models.DateTimeField('Обновлено', auto_now=True)
+
+    class Meta:
+        verbose_name = 'Корзина'
+        verbose_name_plural = 'Корзины'
+
+    def __str__(self):
+        return f'Корзина {self.user.username}'
+
+    @property
+    def total_price(self):
+        return sum(item.line_total for item in self.items.select_related('product'))
+
+    @property
+    def total_quantity(self):
+        return sum(item.quantity for item in self.items.all())
+
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(
+        Cart,
+        on_delete=models.CASCADE,
+        related_name='items',
+        verbose_name='Корзина',
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='cart_items',
+        verbose_name='Товар',
+    )
+    quantity = models.PositiveIntegerField('Количество', default=1)
+
+    class Meta:
+        verbose_name = 'Позиция корзины'
+        verbose_name_plural = 'Позиции корзины'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['cart', 'product'],
+                name='catalog_cartitem_unique_product_per_cart',
+            ),
+        ]
+
+    def __str__(self):
+        return f'{self.product.name} × {self.quantity}'
+
+    @property
+    def line_total(self):
+        if self.product.price is None:
+            return 0
+        return self.product.price * self.quantity

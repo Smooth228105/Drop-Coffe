@@ -6,8 +6,13 @@ const PLACEHOLDER =
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect fill="#f7efe6" width="400" height="300"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#a86538" font-family="sans-serif" font-size="18">Нет фото</text></svg>',
   )
 
-export default function ProductCard({ product, onClick }) {
+export default function ProductCard({ product, onClick, onAddToCart, addLoading }) {
   const imageSrc = product.image || PLACEHOLDER
+
+  const handleAddClick = (event) => {
+    event.stopPropagation()
+    onAddToCart?.(product)
+  }
 
   return (
     <article
@@ -39,7 +44,17 @@ export default function ProductCard({ product, onClick }) {
         <h3 className="font-display text-xl font-semibold leading-snug text-espresso-900 transition-colors group-hover:text-caramel-600">
           {product.name}
         </h3>
-        <p className="mt-2 text-lg font-bold text-caramel-600">{formatPrice(product.price)}</p>
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <p className="text-lg font-bold text-caramel-600">{formatPrice(product.price)}</p>
+          <button
+            type="button"
+            onClick={handleAddClick}
+            disabled={addLoading}
+            className="rounded-xl bg-espresso-900 px-3 py-2 text-xs font-bold uppercase tracking-wide text-cream-50 transition hover:bg-caramel-600 disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm sm:normal-case sm:tracking-normal"
+          >
+            {addLoading ? '…' : 'В корзину'}
+          </button>
+        </div>
       </div>
     </article>
   )

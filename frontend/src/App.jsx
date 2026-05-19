@@ -1,10 +1,14 @@
 import { useState } from 'react'
+import CartDrawer from './components/CartDrawer'
 import EmptyState from './components/EmptyState'
+import Header from './components/Header'
 import Loader from './components/Loader'
+import AuthModal from './components/AuthModal'
 import ProductDrawer from './components/ProductDrawer'
 import ProductGrid from './components/ProductGrid'
 import SearchBar from './components/SearchBar'
 import Sidebar from './components/Sidebar'
+import { useCart } from './contexts/CartContext'
 import { useCatalog } from './hooks/useCatalog'
 import { getCategoryDisplayName } from './utils/categoryDisplay'
 
@@ -41,6 +45,8 @@ export default function App() {
     retry,
   } = useCatalog()
 
+  const { totalQuantity, addToCart, actionLoading: cartActionLoading, openCart } = useCart()
+
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   const handleProductClick = (product) => {
@@ -53,15 +59,19 @@ export default function App() {
     window.setTimeout(closeProduct, 300)
   }
 
+  const handleAddToCart = async (product) => {
+    const added = await addToCart(product.id)
+    if (!added) {
+      openCart()
+    }
+  }
+
+  const subtitle = loading
+    ? 'Загрузка…'
+    : `${products.length} ${products.length === 1 ? 'позиция' : 'позиций'}`
+
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">
-      <header className="border-b border-cream-200 bg-white/90 px-4 py-4 backdrop-blur-sm lg:hidden">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-caramel-600">
-          Drop Coffee
-        </p>
-        <h1 className="font-display text-2xl font-bold text-espresso-900">Меню кондитерской</h1>
-      </header>
-
       <Sidebar
         categories={categories}
         selectedCategoryId={selectedCategoryId}
@@ -69,24 +79,16 @@ export default function App() {
       />
 
       <main className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 border-b border-cream-200 bg-cream-50/90 px-4 py-5 backdrop-blur-md sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <section>
-              <p className="hidden text-xs font-semibold uppercase tracking-[0.2em] text-caramel-600 lg:block">
-                Drop Coffee
-              </p>
-              <h2 className="font-display text-2xl font-bold text-espresso-900 sm:text-3xl">
-                {getCategoryDisplayName(selectedCategory) || 'Каталог'}
-              </h2>
-              <p className="mt-1 text-sm text-espresso-700/70">
-                {loading
-                  ? 'Загрузка…'
-                  : `${products.length} ${products.length === 1 ? 'позиция' : 'позиций'}`}
-              </p>
-            </section>
-            <SearchBar value={searchQuery} onChange={setSearchQuery} />
-          </div>
-        </header>
+        <Header
+          title={getCategoryDisplayName(selectedCategory) || 'Каталог'}
+          subtitle={subtitle}
+          cartCount={totalQuantity}
+          onCartClick={openCart}
+        />
+
+        <div className="border-b border-cream-200 bg-cream-50/90 px-4 py-4 sm:px-6 lg:px-8">
+          <SearchBar value={searchQuery} onChange={setSearchQuery} />
+        </div>
 
         <section className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
           {loading && <Loader />}
@@ -102,7 +104,12 @@ export default function App() {
             />
           )}
           {!loading && !error && products.length > 0 && (
-            <ProductGrid products={products} onProductClick={handleProductClick} />
+            <ProductGrid
+              products={products}
+              onProductClick={handleProductClick}
+              onAddToCart={handleAddToCart}
+              addLoading={cartActionLoading}
+            />
           )}
         </section>
       </main>
@@ -111,7 +118,12 @@ export default function App() {
         product={selectedProduct}
         isOpen={isDrawerOpen && Boolean(selectedProduct)}
         onClose={handleDrawerClose}
+        onAddToCart={handleAddToCart}
+        addLoading={cartActionLoading}
       />
+
+      <CartDrawer />
+      <AuthModal />
     </div>
   )
 }
