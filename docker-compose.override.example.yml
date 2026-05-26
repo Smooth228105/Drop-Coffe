@@ -1,0 +1,14 @@
+# Скопируйте в docker-compose.override.yml для локальной БД и media:
+#   cp docker-compose.override.example.yml docker-compose.override.yml
+#
+# !reset отключает named volumes из docker-compose.yml,
+# чтобы использовались только ваши локальные файлы.
+
+services:
+  backend:
+    volumes: !reset
+      - ./db.sqlite3:/app/data/db.sqlite3
+      - ./media:/app/media
+      - ./staticfiles:/app/staticfiles
+    environment:
+      SERVE_MEDIA: "True"

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from .media_utils import resolve_media_url
 from .models import Category, Product
 
 
@@ -20,15 +21,4 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'price', 'description', 'image', 'category')
 
     def get_image(self, obj: Product) -> str | None:
-        if not obj.photo:
-            return None
-
-        photo = obj.photo.strip()
-        if photo.startswith(('http://', 'https://')):
-            return photo
-
-        path = photo if photo.startswith('/') else f'/media/{photo.lstrip("/")}'
-        request = self.context.get('request')
-        if request is not None:
-            return request.build_absolute_uri(path)
-        return path
+        return resolve_media_url(obj.photo)

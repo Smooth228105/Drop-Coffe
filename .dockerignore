@@ -1,0 +1,36 @@
+# Git & IDE
+.git
+.gitignore
+.cursor
+*.md
+!DOCKER.md
+
+# Python
+.venv
+venv
+__pycache__
+*.py[cod]
+*.egg-info
+.pytest_cache
+.mypy_cache
+
+# Node
+frontend/node_modules
+drop_coffe/node_modules
+frontend/dist
+
+# Local env & secrets
+.env
+.env.*
+!.env.example
+
+# Legacy / dev-only
+drop_coffe/
+agent-transcripts/
+
+# Docker build context noise (data comes from volumes)
+staticfiles/
+
+# OS
+.DS_Store
+Thumbs.db

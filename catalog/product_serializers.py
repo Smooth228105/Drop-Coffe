@@ -37,5 +37,10 @@ class ProductWriteSerializer(serializers.ModelSerializer):
             validated_data['photo'] = self._save_image(image)
         return super().update(instance, validated_data)
 
+    def validate_image(self, image):
+        if image is not None and hasattr(image, 'size') and image.size > 10 * 1024 * 1024:
+            raise serializers.ValidationError('Размер файла не должен превышать 10 МБ.')
+        return image
+
     def to_representation(self, instance):
         return ProductSerializer(instance, context=self.context).data
